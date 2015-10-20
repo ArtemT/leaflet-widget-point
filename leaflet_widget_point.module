@@ -164,7 +164,7 @@ function leaflet_widget_point_field_widget_form(&$form, &$form_state, $field, $i
     case 'leaflet_widget_point_widget':
       $id = 'leaflet-widget_' . str_replace('_', '-', $instance['field_name']);
       $class = 'leaflet-widget';
-      $style = 'height: 300px;';
+      $style = 'height: 400px;';
 
       $settings['map']['widget_point'] = array();
       $settings['map']['widget_point']['attach'] = "$id-input";
@@ -197,13 +197,14 @@ function leaflet_widget_point_field_widget_form(&$form, &$form_state, $field, $i
       }
       // Set default value incase form is submitted without javascript enabled.
       $widget['wkt']['#default_value'] = drupal_json_encode($collection);
-      
+
       $widget['wkt']['#attributes']['id'] = $settings['map']['widget_point']['attach'];
 
       //pass path to javascript for resources
       $path = drupal_get_path('module', 'leaflet_widget_point');
       // Include javascript.
       $widget['#attached']['library'][] = array('leaflet_widget_point', 'widget_point');
+      $widget['#attached']['library'][] = array('leaflet_widget_point', 'leaflet_control_geocoder');
       // Settings and geo-data are passed to the widget keyed by field id.
       $widget['#attached']['js'][] = array(
         'type' => 'setting',
@@ -263,10 +264,22 @@ function leaflet_widget_point_library() {
 
   $libraries['widget_point'] = array(
     'title' => 'Widget Point behavior',
-    'version' => '1.x',
+    'version' => '1.x+8',
     'js' => array(
       "$path/js/widget_point.js" => array(),
     )
+  );
+
+  $lcg = libraries_get_path('leaflet-control-geocoder');
+  $libraries['leaflet_control_geocoder'] = array(
+    'title' => 'Leaflet Control Geocoder',
+    'version' => '1.3.1+1',
+    'css' => array(
+      "$lcg/Control.Geocoder.css" => array(),
+    ),
+    'js' => array(
+      "$lcg/Control.Geocoder.js" => array(),
+    ),
   );
 
   return $libraries;

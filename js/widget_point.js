@@ -7,9 +7,6 @@
     };
 
     function attach(context, settings) {
-              
-        
-
         $('.leaflet-widget').once().each(function(i, item) {
 
             var crosshairIcon = L.icon({
@@ -17,7 +14,6 @@
             iconSize:     [200, 200], // size of the icon
             iconAnchor:   [100, 100], // point of the icon which will correspond to marker's location
             });
-
 
             var id = $(item).attr('id'),
                 options = settings.leaflet_widget_point_widget[id];
@@ -48,16 +44,30 @@
                 }]};
                 var obj = [];
                 obj._attach = L.DomUtil.get(options.map.widget_point.attach);
-                obj._attach.value = JSON.stringify(someFeatures);                
+                obj._attach.value = JSON.stringify(someFeatures);
             });
-            if(settings.leaflet_widget_point_widget.lat!=""){
-              //map.panTo(new L.LatLng(settings.leaflet_widget_point_widget.lat, settings.leaflet_widget_point_widget.lng));
-              map.panTo(new L.LatLng(settings.leaflet_widget_point_widget.lat, settings.leaflet_widget_point_widget.lng));
-              
+            if (settings.leaflet_widget_point_widget.lat!=""){
+                map.setZoom(22);
+                map.panTo(new L.LatLng(settings.leaflet_widget_point_widget.lat, settings.leaflet_widget_point_widget.lng));
             }
 
-            Drupal.leaflet_widget_point[id] = map;
+            var markGeocode_callback = L.Control.Geocoder.prototype.markGeocode;
 
+            L.Control.Geocoder.prototype.markGeocode = function (result) {
+              this._map.fitBounds(result.bbox);
+              if (this._geocodeMarker) {
+                this._map.removeLayer(this._geocodeMarker);
+              }
+              return this;
+            }
+            var geocoder = new L.Control.Geocoder.Google('', {
+              geocodingQueryParams: { language: 'ru', components: 'country:RU|administrative_area:Moscow' }
+            });
+            L.Control.geocoder({
+              geocoder: geocoder, collapsed: false, placeholder: "Поиск", errorMessage: "Ничего не найдено."
+            }).addTo(map);
+
+            Drupal.leaflet_widget_point[id] = map;
         });
     }
 
